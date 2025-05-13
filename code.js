@@ -1,4 +1,4 @@
-/* Passport (For auth)
+// /* Passport (For auth) //
 
 const LocalStrategy = require("passport-local").Strategy;
 const mongoose = require("mongoose");
@@ -54,7 +54,6 @@ module.exports = function (passport) {
 app.use(passport.initialize());
 app.use(passport.session());
 
-
 // auth middleware
 module.exports = {
   ensureAuth: (req, res, next) => {
@@ -66,10 +65,8 @@ module.exports = {
   },
 };
 
-*/
-
-/* Session (For storing session in mongodb)
-  const session = require("express-session");
+//  Session (For storing session in mongodb) //
+const session = require("express-session");
 const MongoStore = require("connect-mongo");
 
 app.use(
@@ -80,28 +77,25 @@ app.use(
     store: MongoStore.create({ mongoUrl: process.env.DB_STRING }),
   })
 );
-*/
 
-/* Connect to Database Function
-  const mongoose = require("mongoose");
-  
-  const connectDB = async () => {
-    try {
-      const conn = await mongoose.connect(process.env.DB_STRING);
-      console.log(`Mongodb Connected: ${conn.connection.host}`);
-    } catch (error) {
-      console.error(error);
-      process.exit(1);
-    }
-  };
-  
-  module.exports = connectDB;
-  
-*/
+//Connect to Database Function //
+const mongoose = require("mongoose");
 
-/* User model (with bcrypt for salting pass)
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.DB_STRING);
+    console.log(`Mongodb Connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.error(error);
+    process.exit(1);
+  }
+};
 
-  const mongoose = require("mongoose");
+module.exports = connectDB;
+
+// User model (with bcrypt for salting pass) //
+
+const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
 const UserSchema = new mongoose.Schema({
@@ -149,28 +143,24 @@ UserSchema.methods.comparePassword = function comparePassword(
 
 module.exports = mongoose.model("User", UserSchema);
 
-*/
+//  Multer (middleware helps in storing media to cloudinary or any other db) //
+const multer = require("multer");
+const path = require("path");
 
-/* Multer (middleware helps in storing media to cloudinary or any other db)
-  const multer = require("multer");
-  const path = require("path");
-  
-  module.exports = multer({
-    storage: multer.diskStorage({}),
-    fileFilter: (req, file, cb) => {
-      let ext = path.extname(file.originalname);
-      if (ext !== ".jpg" && ext !== ".jpeg" && ext !== ".png") {
-        cb(new Error("File type is not supported"), false);
-        return;
-      }
-      cb(null, true);
-    },
-  });
-  
-*/
+module.exports = multer({
+  storage: multer.diskStorage({}),
+  fileFilter: (req, file, cb) => {
+    let ext = path.extname(file.originalname);
+    if (ext !== ".jpg" && ext !== ".jpeg" && ext !== ".png") {
+      cb(new Error("File type is not supported"), false);
+      return;
+    }
+    cb(null, true);
+  },
+});
 
-/* Cloudinary (for storing media files )
-  const cloudinary = require("cloudinary").v2;
+// /* Cloudinary (for storing media files ) //
+const cloudinary = require("cloudinary").v2;
 
 require("dotenv").config({ path: "./config/.env" });
 
@@ -182,10 +172,8 @@ cloudinary.config({
 
 module.exports = cloudinary;
 
-*/
-
-/* Basic Auth Controller Template
-  const passport = require("passport");
+// /* Basic Auth Controller Template //
+const passport = require("passport");
 const validator = require("validator");
 const User = require("../models/User");
 
@@ -307,109 +295,103 @@ module.exports = {
   },
 };
 
-*/
+// /* Basic CRUD operation controllers //
+const cloudinary = require("../middleware/cloudinary");
+const Post = require("../models/Post");
 
-/* Basic CRUD operation controllers
-  const cloudinary = require("../middleware/cloudinary");
-  const Post = require("../models/Post");
-  
-  module.exports = {
-    getProfile: async (req, res) => {
-      try {
-        const posts = await Post.find({ user: req.user.id });
-        res.render("profile.ejs", { posts: posts, user: req.user });
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    getFeed: async (req, res) => {
-      try {
-        const posts = await Post.find().sort({ createdAt: "desc" }).lean();
-        res.render("feed.ejs", { posts: posts });
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    getPost: async (req, res) => {
-      try {
-        const post = await Post.findById(req.params.id);
-        res.render("post.ejs", { post: post, user: req.user });
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    createPost: async (req, res) => {
-      try {
-        // Upload image to cloudinary
-        const result = await cloudinary.uploader.upload(req.file.path);
-  
-        await Post.create({
-          title: req.body.title,
-          image: result.secure_url,
-          cloudinaryId: result.public_id,
-          caption: req.body.caption,
-          likes: 0,
-          user: req.user.id,
-        });
-        console.log("Post has been added!");
-        res.redirect("/profile");
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    likePost: async (req, res) => {
-      try {
-        await Post.findOneAndUpdate(
-          { _id: req.params.id },
-          {
-            $inc: { likes: 1 },
-          }
-        );
-        console.log("Likes +1");
-        res.redirect(`/post/${req.params.id}`);
-      } catch (err) {
-        console.log(err);
-      }
-    },
-    deletePost: async (req, res) => {
-      try {
-        // Find post by id
-        let post = await Post.findById({ _id: req.params.id });
-        // Delete image from cloudinary
-        await cloudinary.uploader.destroy(post.cloudinaryId);
-        // Delete post from db
-        await Post.remove({ _id: req.params.id });
-        console.log("Deleted Post");
-        res.redirect("/profile");
-      } catch (err) {
-        res.redirect("/profile");
-      }
-    },
-  };
-  
-*/
+module.exports = {
+  getProfile: async (req, res) => {
+    try {
+      const posts = await Post.find({ user: req.user.id });
+      res.render("profile.ejs", { posts: posts, user: req.user });
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  getFeed: async (req, res) => {
+    try {
+      const posts = await Post.find().sort({ createdAt: "desc" }).lean();
+      res.render("feed.ejs", { posts: posts });
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  getPost: async (req, res) => {
+    try {
+      const post = await Post.findById(req.params.id);
+      res.render("post.ejs", { post: post, user: req.user });
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  createPost: async (req, res) => {
+    try {
+      // Upload image to cloudinary
+      const result = await cloudinary.uploader.upload(req.file.path);
 
-/* Routes Template
-  const express = require("express");
-  const router = express.Router();
-  const authController = require("../controllers/auth");
-  const homeController = require("../controllers/home");
-  const postsController = require("../controllers/posts");
-  const { ensureAuth, ensureGuest } = require("../middleware/auth");
-  
-  //Main Routes - simplified for now
-  router.get("/", homeController.getIndex);
-  router.get("/profile", ensureAuth, postsController.getProfile);
-  router.get("/feed", ensureAuth, postsController.getFeed);
-  router.get("/login", authController.getLogin);
-  router.post("/login", authController.postLogin);
-  router.get("/logout", authController.logout);
-  router.get("/signup", authController.getSignup);
-  router.post("/signup", authController.postSignup);
-  
-  module.exports = router;
-  
-*/
+      await Post.create({
+        title: req.body.title,
+        image: result.secure_url,
+        cloudinaryId: result.public_id,
+        caption: req.body.caption,
+        likes: 0,
+        user: req.user.id,
+      });
+      console.log("Post has been added!");
+      res.redirect("/profile");
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  likePost: async (req, res) => {
+    try {
+      await Post.findOneAndUpdate(
+        { _id: req.params.id },
+        {
+          $inc: { likes: 1 },
+        }
+      );
+      console.log("Likes +1");
+      res.redirect(`/post/${req.params.id}`);
+    } catch (err) {
+      console.log(err);
+    }
+  },
+  deletePost: async (req, res) => {
+    try {
+      // Find post by id
+      let post = await Post.findById({ _id: req.params.id });
+      // Delete image from cloudinary
+      await cloudinary.uploader.destroy(post.cloudinaryId);
+      // Delete post from db
+      await Post.remove({ _id: req.params.id });
+      console.log("Deleted Post");
+      res.redirect("/profile");
+    } catch (err) {
+      res.redirect("/profile");
+    }
+  },
+};
+
+// /* Routes Template //
+const express = require("express");
+const router = express.Router();
+const authController = require("../controllers/auth");
+const homeController = require("../controllers/home");
+const postsController = require("../controllers/posts");
+const { ensureAuth, ensureGuest } = require("../middleware/auth");
+
+//Main Routes - simplified for now
+router.get("/", homeController.getIndex);
+router.get("/profile", ensureAuth, postsController.getProfile);
+router.get("/feed", ensureAuth, postsController.getFeed);
+router.get("/login", authController.getLogin);
+router.post("/login", authController.postLogin);
+router.get("/logout", authController.logout);
+router.get("/signup", authController.getSignup);
+router.post("/signup", authController.postSignup);
+
+module.exports = router;
 
 /* EJS template
   <%- include('partials/header') -%>
