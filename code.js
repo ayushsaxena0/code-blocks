@@ -512,3 +512,25 @@ app.use("/todos", todoRoutes);
 app.listen(process.env.PORT || 3000, () => {
   console.log("Server is listening");
 });
+
+// Required Dependencies
+const dependencies = {
+  bcrypt: "^5.1.1",
+  cloudinary: "^2.6.1",
+  "connect-mongo": "^5.1.0",
+  cors: "^2.8.5",
+  dotenv: "^16.5.0",
+  ejs: "^3.1.10",
+  express: "^5.1.0",
+  "express-flash": "^0.0.2",
+  "express-session": "^1.18.1",
+  "method-override": "^3.0.0",
+  mongodb: "^6.16.0",
+  mongoose: "^8.14.2",
+  morgan: "^1.10.0",
+  multer: "^1.4.5-lts.1",
+  nodemon: "^3.1.10",
+  passport: "^0.7.0",
+  "passport-local": "^1.0.0",
+  validator: "^13.15.0",
+};
